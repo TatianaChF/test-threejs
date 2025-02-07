@@ -33,10 +33,12 @@ type SceneObjects = {
 const element = ref<HTMLCanvasElement | null>(null);
 const doorHeight = ref<number>(5);
 const doorWidth = ref<number>(3);
-let scene: any;
-let camera: THREE.Camera;
-let renderer = new THREE.WebGLRenderer();
-let door: THREE.Mesh<THREE.BoxGeometry, THREE.MeshBasicMaterial, THREE.Object3DEventMap>;
+const objects: SceneObjects = {
+  scene: null,
+  camera: null,
+  renderer: null,
+  door: null
+};
 
 const addScene = () => {
   scene = new THREE.Scene();
