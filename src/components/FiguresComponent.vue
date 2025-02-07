@@ -75,6 +75,8 @@ const addScene = () => {
 }
 
 const addFigures = () => {
+  if (!objects.scene) return;
+
   const sphere = new THREE.Mesh(
       new THREE.SphereGeometry(1, 20, 20),
       new THREE.MeshBasicMaterial({color: "red"}),
@@ -87,7 +89,7 @@ const addFigures = () => {
   );
   cube.position.set(0,0,0);
 
-  scene.add(sphere, cube);
+  objects.scene.add(sphere, cube);
 }
 
 const addDoor = (texture: THREE.Texture) => {
