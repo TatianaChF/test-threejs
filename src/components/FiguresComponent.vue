@@ -63,6 +63,18 @@ onMounted(() => {
 </script>
 
 <template>
+  <div>
+    <input
+        type="range"
+        min="1"
+        max="10"
+        step="0.1"/>
+    <input
+        type="range"
+        min="1"
+        max="10"
+        step="0.1"/>
+  </div>
   <canvas ref="element"/>
 </template>
 
