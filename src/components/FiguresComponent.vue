@@ -6,8 +6,12 @@ import woodUrl from '/wood.png';
 const element = ref<HTMLCanvasElement | null>(null);
 const doorHeight = ref<number>(5);
 const doorWidth = ref<number>(3);
-const scene = new THREE.Scene();
-const camera = new THREE.PerspectiveCamera(
+let scene;
+let camera;
+let renderer = new THREE.WebGLRenderer();
+let door: THREE.Mesh<THREE.BoxGeometry, THREE.MeshBasicMaterial, THREE.Object3DEventMap>;
+scene = new THREE.Scene();
+camera = new THREE.PerspectiveCamera(
     75,
     window.innerWidth / window.innerHeight,
     0.1,
@@ -28,9 +32,6 @@ const cube = new THREE.Mesh(
     new THREE.MeshBasicMaterial({color: "purple"}),
 );
 cube.position.set(0,0,0);
-
-let renderer = new THREE.WebGLRenderer();
-let door: THREE.Mesh<THREE.BoxGeometry, THREE.MeshBasicMaterial, THREE.Object3DEventMap>;
 
 new THREE.TextureLoader().load(
     woodUrl,
