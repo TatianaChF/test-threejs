@@ -23,6 +23,13 @@ import * as THREE from "three";
 import {onBeforeMount, onMounted, ref} from "vue";
 import woodUrl from '/wood.png';
 
+type SceneObjects = {
+  scene: THREE.Scene | null;
+  camera: THREE.PerspectiveCamera | null;
+  renderer: THREE.WebGLRenderer | null;
+  door: THREE.Mesh | null;
+}
+
 const element = ref<HTMLCanvasElement | null>(null);
 const doorHeight = ref<number>(5);
 const doorWidth = ref<number>(3);
