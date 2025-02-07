@@ -93,13 +93,17 @@ const addFigures = () => {
 }
 
 const addDoor = (texture: THREE.Texture) => {
+  if (!objects.scene) return;
+
+  const geometry = new THREE.BoxGeometry(
+      doorWidth.value,
+      doorHeight.value,
+      0.3
+  );
   const material = new THREE.MeshBasicMaterial({ map: texture });
-  door = new THREE.Mesh(
-      new THREE.BoxGeometry(doorWidth.value,doorHeight.value,0.3,),
-      material
-  )
-  door.position.set(3,0,0);
-  scene.add(door);
+  objects.door = new THREE.Mesh(geometry, material);
+  objects.door.position.set(3,0,0);
+  objects.scene.add(door);
 }
 
 const updateDoor = () => {
