@@ -4,6 +4,8 @@ import {onMounted, ref} from "vue";
 import woodUrl from '/wood.png';
 
 const element = ref<HTMLCanvasElement | null>(null);
+const doorHeight = ref<number>(5);
+const doorWidth = ref<number>(3);
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(
     75,
@@ -28,29 +30,31 @@ const cube = new THREE.Mesh(
 cube.position.set(0,0,0);
 
 let renderer = new THREE.WebGLRenderer();
-
-const group = new THREE.Group();
-group.add(sphere, cube);
-scene.add(group);
+let door: THREE.Mesh<THREE.BoxGeometry, THREE.MeshBasicMaterial, THREE.Object3DEventMap>;
 
 new THREE.TextureLoader().load(
     woodUrl,
     function (texture) {
       const material = new THREE.MeshBasicMaterial({ map: texture });
-      const door = new THREE.Mesh(
-          new THREE.BoxGeometry(3,5,0.3,),
+      door = new THREE.Mesh(
+          new THREE.BoxGeometry(doorWidth.value,doorHeight.value,0.3,),
           material
       )
       door.position.set(3,0,0);
-      scene.add(cube);
-      group.add(door);
+      scene.add(door)
       renderer.render(scene, camera);
     }
 );
 
-// const light = new THREE.DirectionalLight('white', 100);
-// light.position.set(10, 10, 10);
-// scene.add(light);
+const updateDoor = () => {
+  door.geometry.dispose();
+  scene.remove(door);
+
+  const newDoorGeometry = new THREE.BoxGeometry(doorWidth.value, doorHeight.value, 0.3);
+  door = new THREE.Mesh(newDoorGeometry, door.material);
+  door.position.set(3, 0, 0);
+  scene.add(door);
+}
 
 onMounted(() => {
   renderer = new THREE.WebGLRenderer({
@@ -65,11 +69,15 @@ onMounted(() => {
 <template>
   <div>
     <input
+        v-model="doorHeight"
+        @input="updateDoor"
         type="range"
         min="1"
         max="10"
         step="0.1"/>
     <input
+        v-model="doorWidth"
+        @input="updateDoor"
         type="range"
         min="1"
         max="10"
