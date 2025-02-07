@@ -10,7 +10,14 @@
       0.1,
       1000
   );
+  camera.position.z = 5;
   scene.add(camera);
+
+  const sphere = new THREE.Mesh(
+      new THREE.SphereGeometry(1, 20, 20),
+      new THREE.MeshBasicMaterial({color: 0x005423}),
+  );
+  scene.add(sphere);
 
   onMounted(() => {
     const renderer = new THREE.WebGLRenderer({
