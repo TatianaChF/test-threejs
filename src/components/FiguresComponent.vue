@@ -15,9 +15,19 @@
 
   const sphere = new THREE.Mesh(
       new THREE.SphereGeometry(1, 20, 20),
-      new THREE.MeshBasicMaterial({color: 0x005423}),
+      new THREE.MeshBasicMaterial({color: "red"}),
   );
-  scene.add(sphere);
+  sphere.position.set(-2,0,0);
+
+  const cube = new THREE.Mesh(
+      new THREE.BoxGeometry(1,1,1,),
+      new THREE.MeshBasicMaterial({color: "purple"}),
+  );
+  cube.position.set(0,0,0);
+
+  const group = new THREE.Group();
+  group.add(sphere, cube);
+  scene.add(group);
 
   onMounted(() => {
     const renderer = new THREE.WebGLRenderer({
