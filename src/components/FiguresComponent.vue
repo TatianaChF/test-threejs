@@ -41,30 +41,35 @@ const objects: SceneObjects = {
 };
 
 const addScene = () => {
-  scene = new THREE.Scene();
-  camera = new THREE.PerspectiveCamera(
+  objects.scene = new THREE.Scene();
+  objects.camera = new THREE.PerspectiveCamera(
       75,
       window.innerWidth / window.innerHeight,
       0.1,
       1000
   );
-  renderer = new THREE.WebGLRenderer({
-    canvas: element.value as unknown as HTMLCanvasElement,
-    antialias: true
-  });
 
-  camera.position.z = 5;
-  scene.background = new THREE.Color("skyblue");
-  scene.add(camera);
-  renderer.setSize(window.innerWidth, window.innerHeight);
+  if (objects.renderer) {
+    objects.renderer.setSize(window.innerWidth, window.innerHeight);
+    objects.renderer = new THREE.WebGLRenderer({
+      canvas: element.value as unknown as HTMLCanvasElement,
+      antialias: true
+    });
+  }
 
-  addFigures();
+  if (objects.camera) {
+    objects.camera.position.z = 5;
+  }
+
+  objects.scene.background = new THREE.Color("skyblue");
+  //scene.add(camera);
 
   new THREE.TextureLoader().load(
       woodUrl,
-      function (texture) {
+      function (texture: THREE.Texture) {
+        addFigures();
         addDoor(texture);
-        renderer.render(scene, camera);
+        //objects.renderer.render(scene, camera);
       }
   );
 }
