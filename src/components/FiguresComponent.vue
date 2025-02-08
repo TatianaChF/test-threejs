@@ -31,7 +31,6 @@
 <script setup lang="ts">
 import {ref, onMounted, onBeforeUnmount, type Ref} from 'vue';
 import * as THREE from 'three';
-import { FlyControls } from 'three/addons/controls/FlyControls.js';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 
 type SceneObjects = {
@@ -40,6 +39,7 @@ type SceneObjects = {
   renderer: THREE.WebGLRenderer | null;
   door: THREE.Mesh | null;
   controls: OrbitControls | null;
+  light: THREE.PointLight | null;
 }
 
 const element: Ref<HTMLElement | null> = ref(null);
@@ -50,7 +50,8 @@ const objects: SceneObjects = {
   camera: null,
   renderer: null,
   door: null,
-  controls: null
+  controls: null,
+  light: null
 };
 let clock = new THREE.Clock();
 
@@ -83,6 +84,10 @@ const addScene = (): void => {
     addFigures();
     animate();
   });
+
+  objects.light = new THREE.PointLight( 0xfffff, 20, 100 );
+  objects.light.position.set( 3, 0, 8 );
+  objects.scene.add( objects.light );
 };
 
 const addDoor = (texture: THREE.Texture): void => {
