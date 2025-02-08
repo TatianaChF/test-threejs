@@ -1,27 +1,28 @@
 <template>
-  <div>
-    <input
-        v-model="doorHeight"
-        @input="updateDoor"
-        type="range"
-        min="1"
-        max="10"
-        step="0.1"/>
-    <input
-        v-model="doorWidth"
-        @input="updateDoor"
-        type="range"
-        min="1"
-        max="10"
-        step="0.1"/>
+  <div class="container">
+    <div>
+      <input
+          v-model="doorHeight"
+          @input="updateDoor"
+          type="range"
+          min="1"
+          max="10"
+          step="0.1"/>
+      <input
+          v-model="doorWidth"
+          @input="updateDoor"
+          type="range"
+          min="1"
+          max="10"
+          step="0.1"/>
+    </div>
+    <canvas ref="element"/>
   </div>
-  <canvas ref="element"/>
 </template>
 
 <script setup lang="ts">
-import * as THREE from "three";
-import {onBeforeMount, onMounted, ref} from "vue";
-import woodUrl from '/wood.png';
+import { ref, onMounted, onBeforeUnmount } from 'vue';
+import * as THREE from 'three';
 
 type SceneObjects = {
   scene: THREE.Scene | null;
@@ -40,16 +41,14 @@ const objects: SceneObjects = {
   door: null
 };
 
-const addScene = () => {
+const addScene = (): void => {
   objects.scene = new THREE.Scene();
-  objects.camera = new THREE.PerspectiveCamera(
-      75,
-      window.innerWidth / window.innerHeight,
-      0.1,
-      1000
-  );
+  objects.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+  objects.renderer = new THREE.WebGLRenderer({ antialias: true });
 
-  if (objects.renderer) {
+  objects.scene.background = new THREE.Color("skyblue");
+
+  if (objects.renderer && element.value) {
     objects.renderer.setSize(window.innerWidth, window.innerHeight);
     objects.renderer = new THREE.WebGLRenderer({
       canvas: element.value as unknown as HTMLCanvasElement,
@@ -61,71 +60,97 @@ const addScene = () => {
     objects.camera.position.z = 5;
   }
 
-  objects.scene.background = new THREE.Color("skyblue");
-  //scene.add(camera);
+  const textureLoader = new THREE.TextureLoader();
+  textureLoader.load('/wood.png', (texture: THREE.Texture) => {
+    addDoor(texture);
+    addFigures();
+    animate();
+  });
+};
 
-  new THREE.TextureLoader().load(
-      woodUrl,
-      function (texture: THREE.Texture) {
-        addFigures();
-        addDoor(texture);
-        //objects.renderer.render(scene, camera);
-      }
-  );
-}
-
-const addFigures = () => {
-  if (!objects.scene) return;
-
-  const sphere = new THREE.Mesh(
-      new THREE.SphereGeometry(1, 20, 20),
-      new THREE.MeshBasicMaterial({color: "red"}),
-  );
-  sphere.position.set(-2,0,0);
-
-  const cube = new THREE.Mesh(
-      new THREE.BoxGeometry(1,1,1,),
-      new THREE.MeshBasicMaterial({color: "purple"}),
-  );
-  cube.position.set(0,0,0);
-
-  objects.scene.add(sphere, cube);
-}
-
-const addDoor = (texture: THREE.Texture) => {
+const addDoor = (texture: THREE.Texture): void => {
   if (!objects.scene) return;
 
   const geometry = new THREE.BoxGeometry(
       doorWidth.value,
       doorHeight.value,
-      0.3
+      0.1
   );
   const material = new THREE.MeshBasicMaterial({ map: texture });
   objects.door = new THREE.Mesh(geometry, material);
-  objects.door.position.set(3,0,0);
-  objects.scene.add(door);
-}
+  objects.door.position.set(3, 0, 0);
+  objects.scene.add(objects.door);
+};
 
-const updateDoor = () => {
-  if (!door) return;
+const addFigures = (): void => {
+  if (!objects.scene) return;
 
-  door.geometry.dispose();
-  scene.remove(door);
+  const sphere = new THREE.Mesh(
+      new THREE.SphereGeometry(1, 32, 32),
+      new THREE.MeshBasicMaterial({ color: 0xff0000 })
+  );
+  sphere.position.set(-2, 0, 0);
 
-  const newDoorGeometry = new THREE.BoxGeometry(doorWidth.value, doorHeight.value, 0.3);
-  door = new THREE.Mesh(newDoorGeometry, door.material);
-  door.position.set(3, 0, 0);
-  scene.add(door);
-}
+  const cube = new THREE.Mesh(
+      new THREE.BoxGeometry(1, 1, 1),
+      new THREE.MeshBasicMaterial({ color: 0x800080 })
+  );
 
-onMounted(addScene);
-onBeforeMount(() => {
-  scene?.dispose();
-  renderer?.dispose();
-})
+  objects.scene.add(sphere, cube);
+};
 
+const updateDoor = (): void => {
+  if (!objects.door || !objects.scene) return;
+
+  objects.door.geometry.dispose();
+  objects.scene.remove(objects.door);
+
+  const newGeometry = new THREE.BoxGeometry(
+      doorWidth.value,
+      doorHeight.value,
+      0.1
+  );
+  const textureLoader = new THREE.TextureLoader();
+  textureLoader.load('/wood.png', (texture: THREE.Texture) => {
+    objects.door = new THREE.Mesh(
+        newGeometry,
+        new THREE.MeshBasicMaterial({ map: texture })
+    );
+    objects.door.position.set(3, 0, 0);
+    objects.scene?.add(objects.door);
+  });
+};
+
+const animate = (): void => {
+  requestAnimationFrame(animate);
+
+  if (objects.renderer && objects.scene && objects.camera) {
+    objects.renderer.render(objects.scene, objects.camera);
+  }
+};
+
+onMounted(() => {
+  addScene();
+});
+
+onBeforeUnmount(() => {
+  if (objects.renderer) {
+    objects.renderer.dispose();
+  }
+  if (objects.door) {
+    objects.door.geometry.dispose();
+    if (Array.isArray(objects.door.material)) {
+      objects.door.material.forEach(m => m.dispose());
+    } else {
+      (objects.door.material as THREE.Material).dispose();
+    }
+  }
+});
 </script>
 
 <style scoped>
-
+.container {
+  position: relative;
+  height: 100vh;
+}
 </style>
