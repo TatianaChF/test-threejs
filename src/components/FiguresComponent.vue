@@ -59,9 +59,26 @@ const objects: SceneObjects = {
 };
 let clock = new THREE.Clock();
 
+let canvasWidth = window.innerWidth;
+let canvasHeight = window.innerHeight;
+
+const onWindowResize = () => {
+  canvasHeight = window.innerHeight;
+  canvasWidth = window.innerWidth;
+
+  if (objects.camera) {
+    objects.camera.aspect = canvasWidth / canvasHeight;
+    objects.camera.updateProjectionMatrix();
+  }
+
+  if (objects.renderer) {
+    objects.renderer.setSize(canvasWidth, canvasHeight);
+  }
+}
+
 const addScene = async () => {
   objects.scene = new THREE.Scene();
-  objects.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+  objects.camera = new THREE.PerspectiveCamera(75, canvasWidth / canvasHeight, 0.1, 1000);
   objects.renderer = new THREE.WebGLRenderer({
     antialias: true,
     powerPreference: "high-performance"
@@ -110,7 +127,7 @@ const addScene = async () => {
   objects.scene.background = hdrTexture;
 
   if (objects.renderer && element.value) {
-    objects.renderer.setSize(window.innerWidth, window.innerHeight);
+    objects.renderer.setSize(canvasWidth, canvasHeight);
     objects.renderer.shadowMap.enabled = true;
     objects.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     element.value.appendChild(objects.renderer.domElement);
@@ -120,6 +137,7 @@ const addScene = async () => {
 
   if (objects.camera) {
     objects.camera.position.z = 10;
+    objects.camera.position.y = 10;
   }
 
   if (objects.camera && objects.renderer) {
@@ -133,6 +151,8 @@ const addScene = async () => {
     addFigures();
     animate();
   });
+
+  window.addEventListener('resize', onWindowResize)
 };
 
 const addDoor = (texture: THREE.Texture): void => {
@@ -190,7 +210,7 @@ const updateDoor = (): void => {
       0.1
   );
   const textureLoader = new THREE.TextureLoader();
-  textureLoader.load('/wood.png', (texture: THREE.Texture) => {
+  textureLoader.load(`${window.location.pathname}/wood.png`, (texture: THREE.Texture) => {
     objects.door = new THREE.Mesh(
         newGeometry,
         new THREE.MeshBasicMaterial({map: texture})
