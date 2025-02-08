@@ -31,7 +31,7 @@ type SceneObjects = {
   door: THREE.Mesh | null;
 }
 
-const element = ref<HTMLCanvasElement | null>(null);
+const element = ref<HTMLElement | null>(null);
 const doorHeight = ref<number>(5);
 const doorWidth = ref<number>(3);
 const objects: SceneObjects = {
@@ -50,10 +50,7 @@ const addScene = (): void => {
 
   if (objects.renderer && element.value) {
     objects.renderer.setSize(window.innerWidth, window.innerHeight);
-    objects.renderer = new THREE.WebGLRenderer({
-      canvas: element.value as unknown as HTMLCanvasElement,
-      antialias: true
-    });
+    element.value.appendChild(objects.renderer.domElement);
   }
 
   if (objects.camera) {
