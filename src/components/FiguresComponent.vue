@@ -1,4 +1,4 @@
-<<template>
+<template>
   <div class="container">
     <div class="controls">
       <div class="control-group">
@@ -29,14 +29,17 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onBeforeUnmount, type Ref } from 'vue';
+import {ref, onMounted, onBeforeUnmount, type Ref} from 'vue';
 import * as THREE from 'three';
+import { FlyControls } from 'three/addons/controls/FlyControls.js';
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 
 type SceneObjects = {
   scene: THREE.Scene | null;
   camera: THREE.PerspectiveCamera | null;
   renderer: THREE.WebGLRenderer | null;
   door: THREE.Mesh | null;
+  controls: OrbitControls | null;
 }
 
 const element: Ref<HTMLElement | null> = ref(null);
@@ -46,8 +49,10 @@ const objects: SceneObjects = {
   scene: null,
   camera: null,
   renderer: null,
-  door: null
+  door: null,
+  controls: null
 };
+let clock = new THREE.Clock();
 
 const addScene = (): void => {
   objects.scene = new THREE.Scene();
@@ -57,10 +62,17 @@ const addScene = (): void => {
   if (objects.renderer && element.value) {
     objects.renderer.setSize(window.innerWidth, window.innerHeight);
     element.value.appendChild(objects.renderer.domElement);
+
+    objects.renderer.setAnimationLoop(renderCamera);
   }
 
   if (objects.camera) {
     objects.camera.position.z = 10;
+  }
+
+  if (objects.camera && objects.renderer) {
+    objects.controls = new OrbitControls(objects.camera, objects.renderer.domElement);
+    configureControls();
   }
 
   objects.scene.background = new THREE.Color("skyblue");
@@ -126,13 +138,34 @@ const updateDoor = (): void => {
   });
 };
 
+const configureControls = (): void => {
+  if (!objects.controls) return;
+
+  objects.controls.enableDamping = true;
+  objects.controls.dampingFactor = 0.05;
+  objects.controls.rotateSpeed = 0.5;
+  objects.controls.minDistance = 5;
+  objects.controls.maxDistance = 15;
+  objects.controls.enableZoom = true;
+};
+
 const animate = (): void => {
   requestAnimationFrame(animate);
+
+  if (objects.controls) {
+    objects.controls.update();
+  }
 
   if (objects.renderer && objects.scene && objects.camera) {
     objects.renderer.render(objects.scene, objects.camera);
   }
 };
+
+const renderCamera = () => {
+  const delta = clock.getDelta();
+
+  objects.controls.update( delta );
+}
 
 onMounted(() => {
   addScene();
