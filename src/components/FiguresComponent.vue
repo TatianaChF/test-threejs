@@ -136,8 +136,8 @@ const addScene = async () => {
   }
 
   if (objects.camera) {
-    objects.camera.position.z = 8;
-    objects.camera.position.y = 6;
+    objects.camera.position.z = 10;
+    objects.camera.position.y = 3;
   }
 
   if (objects.camera && objects.renderer) {
@@ -151,7 +151,7 @@ const addScene = async () => {
   const textureNormal = textureLoader.load(`${window.location.pathname}/door/Door_Wood_001_normal.jpg`);
   const textureAmbientOcclusion = textureLoader.load(`${window.location.pathname}/door/Door_Wood_001_ambientOcclusion.jpg`);
   const textureHeight = textureLoader.load(`${window.location.pathname}/door/Door_Wood_001_height.jpg`);
-  const textureMetallic= textureLoader.load(`${window.location.pathname}/door/Door_Wood_001_metallic.jpg`);
+  const textureMetallic = textureLoader.load(`${window.location.pathname}/door/Door_Wood_001_metallic.jpg`);
   const textureOpacity = textureLoader.load(`${window.location.pathname}/door/Door_Wood_001_opacity.jpg`);
   const textureRoughness = textureLoader.load(`${window.location.pathname}/door/Door_Wood_001_roughness.jpg`);
 
@@ -203,7 +203,7 @@ const addFigures = (): void => {
   );
   sphere.castShadow = true;
   sphere.receiveShadow = false;
-  sphere.position.set(-2, 3, 0);
+  sphere.position.set(-7, 3, 0);
   sphere.castShadow = true;
   sphere.receiveShadow = true;
 
@@ -213,7 +213,7 @@ const addFigures = (): void => {
   );
   cube.castShadow = true;
   cube.receiveShadow = false;
-  cube.position.set(0, 3, 0);
+  cube.position.set(-5, 3, 0);
   cube.castShadow = true;
   cube.receiveShadow = true;
 
