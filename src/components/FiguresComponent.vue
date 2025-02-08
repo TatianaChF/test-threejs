@@ -4,22 +4,22 @@
       <div class="control-group">
         <label>Высота двери</label>
         <input
-            type="range"
             v-model="doorHeight"
-            min="1"
             max="10"
+            min="1"
             step="0.1"
+            type="range"
             @input="updateDoor"
         >
       </div>
       <div class="control-group">
         <label>Ширина двери</label>
         <input
-            type="range"
             v-model="doorWidth"
-            min="1"
             max="5"
+            min="1"
             step="0.1"
+            type="range"
             @input="updateDoor"
         >
       </div>
@@ -28,14 +28,12 @@
   </div>
 </template>
 
-<script setup lang="ts">
-import {ref, onMounted, onBeforeUnmount, type Ref, computed} from 'vue';
+<script lang="ts" setup>
+import {onBeforeUnmount, onMounted, ref, type Ref} from 'vue';
 import * as THREE from 'three';
-import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
-import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
-import { RGBELoader } from 'three/examples/jsm/loaders/RGBELoader.js';
-
-const baseUrl = computed(() => window.location.origin)
+import {OrbitControls} from 'three/examples/jsm/controls/OrbitControls.js';
+import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
+import {RGBELoader} from 'three/examples/jsm/loaders/RGBELoader.js';
 
 type SceneObjects = {
   scene: THREE.Scene | null;
@@ -70,10 +68,10 @@ const addScene = async () => {
   });
 
   const hdrLoader = new RGBELoader();
-  const hdrTexture = await hdrLoader.loadAsync(`${baseUrl.value}/background.hdr`);
+  const hdrTexture = await hdrLoader.loadAsync(`${window.location.origin}/background.hdr`);
   hdrTexture.mapping = THREE.EquirectangularReflectionMapping;
 
-  const floorTexture = new THREE.TextureLoader().load(`${baseUrl.value}/floor.jpg`);
+  const floorTexture = new THREE.TextureLoader().load(`${window.location.origin}/floor.jpg`);
   floorTexture.wrapS = THREE.RepeatWrapping;
   floorTexture.wrapT = THREE.RepeatWrapping;
   floorTexture.repeat.set(20, 20);
@@ -130,7 +128,7 @@ const addScene = async () => {
   }
 
   const textureLoader = new THREE.TextureLoader();
-  textureLoader.load(`${baseUrl.value}/wood.png`, (texture: THREE.Texture) => {
+  textureLoader.load(`${window.location.origin}/wood.png`, (texture: THREE.Texture) => {
     addDoor(texture);
     addFigures();
     animate();
@@ -145,7 +143,7 @@ const addDoor = (texture: THREE.Texture): void => {
       doorHeight.value,
       0.3
   );
-  const material = new THREE.MeshBasicMaterial({ map: texture });
+  const material = new THREE.MeshBasicMaterial({map: texture});
   objects.door = new THREE.Mesh(geometry, material);
   objects.door.position.set(3, 3, 0);
   objects.door.castShadow = true;
@@ -158,7 +156,7 @@ const addFigures = (): void => {
 
   const sphere = new THREE.Mesh(
       new THREE.SphereGeometry(1, 20, 20),
-      new THREE.MeshBasicMaterial({ color: "red" })
+      new THREE.MeshBasicMaterial({color: "red"})
   );
   sphere.castShadow = true;
   sphere.receiveShadow = false;
@@ -168,11 +166,11 @@ const addFigures = (): void => {
 
   const cube = new THREE.Mesh(
       new THREE.BoxGeometry(1, 1, 1),
-      new THREE.MeshBasicMaterial({ color: "purple" })
+      new THREE.MeshBasicMaterial({color: "purple"})
   );
   cube.castShadow = true;
   cube.receiveShadow = false;
-  cube.position.set(0,3,0);
+  cube.position.set(0, 3, 0);
   cube.castShadow = true;
   cube.receiveShadow = true;
 
@@ -195,7 +193,7 @@ const updateDoor = (): void => {
   textureLoader.load('/wood.png', (texture: THREE.Texture) => {
     objects.door = new THREE.Mesh(
         newGeometry,
-        new THREE.MeshBasicMaterial({ map: texture })
+        new THREE.MeshBasicMaterial({map: texture})
     );
     objects.door.position.set(3, -2, 0);
     objects.scene?.add(objects.door);
@@ -228,7 +226,7 @@ const animate = (): void => {
 const renderCamera = () => {
   const delta = clock.getDelta();
 
-  objects.controls?.update( delta );
+  objects.controls?.update(delta);
 }
 
 onMounted(() => {
