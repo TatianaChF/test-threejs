@@ -29,11 +29,11 @@
 </template>
 
 <script setup lang="ts">
-import {ref, onMounted, onBeforeUnmount, type Ref, computed} from 'vue';
+import {ref, onMounted, onBeforeUnmount, type Ref} from 'vue';
 import * as THREE from 'three';
-import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
-import { RGBELoader } from 'three/examples/jsm/loaders/RGBELoader';
+import { RGBELoader } from 'three/examples/jsm/loaders/RGBELoader.js';
 
 type SceneObjects = {
   scene: THREE.Scene | null;
@@ -226,7 +226,7 @@ const animate = (): void => {
 const renderCamera = () => {
   const delta = clock.getDelta();
 
-  objects.controls.update( delta );
+  objects.controls?.update( delta );
 }
 
 onMounted(() => {
