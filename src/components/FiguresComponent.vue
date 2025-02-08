@@ -70,10 +70,10 @@ const addScene = async () => {
   });
 
   const hdrLoader = new RGBELoader();
-  const hdrTexture = await hdrLoader.loadAsync(`${baseUrl}/background.hdr`);
+  const hdrTexture = await hdrLoader.loadAsync(`${baseUrl.value}/background.hdr`);
   hdrTexture.mapping = THREE.EquirectangularReflectionMapping;
 
-  const floorTexture = new THREE.TextureLoader().load(`${baseUrl}/floor.jpg`);
+  const floorTexture = new THREE.TextureLoader().load(`${baseUrl.value}/floor.jpg`);
   floorTexture.wrapS = THREE.RepeatWrapping;
   floorTexture.wrapT = THREE.RepeatWrapping;
   floorTexture.repeat.set(20, 20);
@@ -130,7 +130,7 @@ const addScene = async () => {
   }
 
   const textureLoader = new THREE.TextureLoader();
-  textureLoader.load(`${baseUrl}/wood.png`, (texture: THREE.Texture) => {
+  textureLoader.load(`${baseUrl.value}/wood.png`, (texture: THREE.Texture) => {
     addDoor(texture);
     addFigures();
     animate();
