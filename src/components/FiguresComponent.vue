@@ -2,7 +2,7 @@
   <div class="container">
     <div class="controls">
       <div class="control-group">
-        <label>Высота двери: {{ doorHeight.toFixed(1) }}</label>
+        <label>Высота двери</label>
         <input
             type="range"
             v-model="doorHeight"
@@ -13,7 +13,7 @@
         >
       </div>
       <div class="control-group">
-        <label>Ширина двери: {{ doorWidth.toFixed(1) }}</label>
+        <label>Ширина двери</label>
         <input
             type="range"
             v-model="doorWidth"
