@@ -137,7 +137,7 @@ const addScene = async () => {
 
   if (objects.camera) {
     objects.camera.position.z = 8;
-    objects.camera.position.y = 8;
+    objects.camera.position.y = 3;
   }
 
   if (objects.camera && objects.renderer) {
