@@ -33,6 +33,7 @@ import {ref, onMounted, onBeforeUnmount, type Ref, computed} from 'vue';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { RGBELoader } from 'three/examples/jsm/loaders/RGBELoader';
 
 type SceneObjects = {
   scene: THREE.Scene | null;
@@ -59,19 +60,18 @@ const objects: SceneObjects = {
 let clock = new THREE.Clock();
 
 const addScene = async () => {
-  objects.loader = new GLTFLoader();
   objects.scene = new THREE.Scene();
-
-  if (objects.loader && objects.scene) {
-    const glt = await objects.loader.loadAsync("/background.glb");
-    glt.scene.scale.set(1.3, 1.3, 1.3);
-    objects.scene.add(glt.scene);
-  }
-
   objects.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
   objects.renderer = new THREE.WebGLRenderer({ antialias: true });
 
-  objects.scene.background = new THREE.Color("white");
+  const hdrLoader = new RGBELoader();
+  const hdrTexture = await hdrLoader.loadAsync('/background.hdr');
+  hdrTexture.mapping = THREE.EquirectangularReflectionMapping;
+
+  objects.scene.environment = hdrTexture;
+  objects.scene.background = hdrTexture;
+
+  //objects.scene.background = new THREE.Color("white");
 
   if (objects.renderer && element.value) {
     objects.renderer.setSize(window.innerWidth, window.innerHeight);
