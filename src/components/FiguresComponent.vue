@@ -29,11 +29,13 @@
 </template>
 
 <script setup lang="ts">
-import {ref, onMounted, onBeforeUnmount, type Ref} from 'vue';
+import {ref, onMounted, onBeforeUnmount, type Ref, computed} from 'vue';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { RGBELoader } from 'three/examples/jsm/loaders/RGBELoader.js';
+
+const baseUrl = computed(() => window.location.origin)
 
 type SceneObjects = {
   scene: THREE.Scene | null;
@@ -68,10 +70,10 @@ const addScene = async () => {
   });
 
   const hdrLoader = new RGBELoader();
-  const hdrTexture = await hdrLoader.loadAsync('/background.hdr');
+  const hdrTexture = await hdrLoader.loadAsync(`${baseUrl}/background.hdr`);
   hdrTexture.mapping = THREE.EquirectangularReflectionMapping;
 
-  const floorTexture = new THREE.TextureLoader().load("/floor.jpg");
+  const floorTexture = new THREE.TextureLoader().load(`${baseUrl}/floor.jpg`);
   floorTexture.wrapS = THREE.RepeatWrapping;
   floorTexture.wrapT = THREE.RepeatWrapping;
   floorTexture.repeat.set(20, 20);
@@ -128,7 +130,7 @@ const addScene = async () => {
   }
 
   const textureLoader = new THREE.TextureLoader();
-  textureLoader.load('/wood.png', (texture: THREE.Texture) => {
+  textureLoader.load(`${baseUrl}/wood.png`, (texture: THREE.Texture) => {
     addDoor(texture);
     addFigures();
     animate();
