@@ -68,9 +68,6 @@ const addScene = async () => {
   const hdrTexture = await hdrLoader.loadAsync('/background.hdr');
   hdrTexture.mapping = THREE.EquirectangularReflectionMapping;
 
-  objects.scene.environment = hdrTexture;
-  objects.scene.background = hdrTexture;
-
   const floorTexture = new THREE.TextureLoader().load("/floor.jpg");
   floorTexture.wrapS = THREE.RepeatWrapping;
   floorTexture.wrapT = THREE.RepeatWrapping;
@@ -89,6 +86,19 @@ const addScene = async () => {
   floor.rotation.x = -Math.PI / 2;
   floor.receiveShadow = true;
   objects.scene.add(floor);
+
+  const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+  objects.scene.add(ambientLight);
+
+  const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+  directionalLight.position.set(0, 5, 5);
+  directionalLight.castShadow = true;
+  directionalLight.shadow.mapSize.width = 2048;
+  directionalLight.shadow.mapSize.height = 2048;
+  objects.scene.add(directionalLight);
+
+  objects.scene.environment = hdrTexture;
+  objects.scene.background = hdrTexture;
 
   //objects.scene.background = new THREE.Color("white");
 
@@ -114,17 +124,6 @@ const addScene = async () => {
     addFigures();
     animate();
   });
-
-  objects.light = new THREE.PointLight( 0xfffff, 100, 1000 );
-  objects.light.position.set( 0, 10, 4);
-  objects.light.castShadow = true;
-  objects.scene.add( objects.light );
-
-  objects.light.shadow.mapSize.width = 512;
-  objects.light.shadow.mapSize.height = 512;
-  objects.light.shadow.camera.near = 0.5;
-  objects.light.shadow.camera.far = 500;
-
 };
 
 const addDoor = (texture: THREE.Texture): void => {
