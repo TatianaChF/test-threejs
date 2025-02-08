@@ -136,8 +136,8 @@ const addScene = async () => {
   }
 
   if (objects.camera) {
-    objects.camera.position.z = 10;
-    objects.camera.position.y = 10;
+    objects.camera.position.z = 5;
+    objects.camera.position.y = 5;
   }
 
   if (objects.camera && objects.renderer) {
@@ -215,7 +215,7 @@ const updateDoor = (): void => {
         newGeometry,
         new THREE.MeshBasicMaterial({map: texture})
     );
-    objects.door.position.set(3, -2, 0);
+    objects.door.position.set(3, 3, 0);
     objects.scene?.add(objects.door);
   });
 };
