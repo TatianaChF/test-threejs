@@ -32,6 +32,7 @@
 import {ref, onMounted, onBeforeUnmount, type Ref} from 'vue';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
 type SceneObjects = {
   scene: THREE.Scene | null;
@@ -40,6 +41,7 @@ type SceneObjects = {
   door: THREE.Mesh | null;
   controls: OrbitControls | null;
   light: THREE.PointLight | null;
+  loader: GLTFLoader | null;
 }
 
 const element: Ref<HTMLElement | null> = ref(null);
@@ -51,14 +53,25 @@ const objects: SceneObjects = {
   renderer: null,
   door: null,
   controls: null,
-  light: null
+  light: null,
+  loader: null
 };
 let clock = new THREE.Clock();
 
-const addScene = (): void => {
+const addScene = async () => {
+  objects.loader = new GLTFLoader();
   objects.scene = new THREE.Scene();
+
+  if (objects.loader && objects.scene) {
+    const glt = await objects.loader.loadAsync("/background.glb");
+    glt.scene.scale.set(1.3, 1.3, 1.3);
+    objects.scene.add(glt.scene);
+  }
+
   objects.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
   objects.renderer = new THREE.WebGLRenderer({ antialias: true });
+
+  objects.scene.background = new THREE.Color("white");
 
   if (objects.renderer && element.value) {
     objects.renderer.setSize(window.innerWidth, window.innerHeight);
@@ -76,8 +89,6 @@ const addScene = (): void => {
     configureControls();
   }
 
-  objects.scene.background = new THREE.Color("skyblue");
-
   const textureLoader = new THREE.TextureLoader();
   textureLoader.load('/wood.png', (texture: THREE.Texture) => {
     addDoor(texture);
@@ -85,9 +96,16 @@ const addScene = (): void => {
     animate();
   });
 
-  objects.light = new THREE.PointLight( 0xfffff, 20, 100 );
-  objects.light.position.set( 3, 0, 8 );
+  objects.light = new THREE.PointLight( 0xfffff, 100, 1000 );
+  objects.light.position.set( 0, 10, 4);
+  objects.light.castShadow = true;
   objects.scene.add( objects.light );
+
+  objects.light.shadow.mapSize.width = 512;
+  objects.light.shadow.mapSize.height = 512;
+  objects.light.shadow.camera.near = 0.5;
+  objects.light.shadow.camera.far = 500;
+
 };
 
 const addDoor = (texture: THREE.Texture): void => {
@@ -100,7 +118,7 @@ const addDoor = (texture: THREE.Texture): void => {
   );
   const material = new THREE.MeshBasicMaterial({ map: texture });
   objects.door = new THREE.Mesh(geometry, material);
-  objects.door.position.set(3, 0, 0);
+  objects.door.position.set(3, 2, 0);
   objects.scene.add(objects.door);
 };
 
@@ -111,12 +129,17 @@ const addFigures = (): void => {
       new THREE.SphereGeometry(1, 20, 20),
       new THREE.MeshBasicMaterial({ color: "red" })
   );
-  sphere.position.set(-2, 0, 0);
+  sphere.castShadow = true;
+  sphere.receiveShadow = false;
+  sphere.position.set(-2, 1, 0);
 
   const cube = new THREE.Mesh(
       new THREE.BoxGeometry(1, 1, 1),
       new THREE.MeshBasicMaterial({ color: "purple" })
   );
+  cube.castShadow = true;
+  cube.receiveShadow = false;
+  cube.position.set(0,1,0);
 
   objects.scene.add(sphere, cube);
 };
@@ -138,7 +161,9 @@ const updateDoor = (): void => {
         newGeometry,
         new THREE.MeshBasicMaterial({ map: texture })
     );
-    objects.door.position.set(3, 0, 0);
+    objects.door.position.set(3, 3, 0);
+    objects.door.castShadow = true;
+    objects.door.receiveShadow = false;
     objects.scene?.add(objects.door);
   });
 };
