@@ -5,9 +5,9 @@
         <label>Высота двери</label>
         <input
             v-model="doorHeight"
-            max="10"
-            min="1"
-            step="0.1"
+            max="100"
+            min="20"
+            step="5"
             type="range"
             @input="updateDoor"
         >
@@ -16,9 +16,9 @@
         <label>Ширина двери</label>
         <input
             v-model="doorWidth"
-            max="5"
-            min="1"
-            step="0.1"
+            max="100"
+            min="40"
+            step="10"
             type="range"
             @input="updateDoor"
         >
@@ -146,16 +146,30 @@ const addScene = async () => {
   }
 
   const textureLoader = new THREE.TextureLoader();
-  textureLoader.load(`${window.location.pathname}/wood.png`, (texture: THREE.Texture) => {
-    addDoor(texture);
-    addFigures();
-    animate();
-  });
+  const textureBase = textureLoader.load(`${window.location.pathname}/door/Door_Wood_001_basecolor.jpg`);
+  textureBase.colorSpace = THREE.SRGBColorSpace;
+  const textureNormal = textureLoader.load(`${window.location.pathname}/door/Door_Wood_001_normal.jpg`);
+  const textureAmbientOcclusion = textureLoader.load(`${window.location.pathname}/door/Door_Wood_001_ambientOcclusion.jpg`);
+  const textureHeight = textureLoader.load(`${window.location.pathname}/door/Door_Wood_001_height.jpg`);
+  const textureMetallic= textureLoader.load(`${window.location.pathname}/door/Door_Wood_001_metallic.jpg`);
+  const textureOpacity = textureLoader.load(`${window.location.pathname}/door/Door_Wood_001_opacity.jpg`);
+  const textureRoughness = textureLoader.load(`${window.location.pathname}/door/Door_Wood_001_roughness.jpg`);
+
+  addDoor(textureBase, textureNormal, textureAmbientOcclusion, textureHeight, textureMetallic, textureOpacity, textureRoughness);
+  addFigures();
+  animate();
 
   window.addEventListener('resize', onWindowResize)
 };
 
-const addDoor = (texture: THREE.Texture): void => {
+const addDoor = (textureBase: THREE.Texture,
+                 textureNormal: THREE.Texture,
+                 textureAmbientOcclusion: THREE.Texture,
+                 textureHeight: THREE.Texture,
+                 textureMetallic: THREE.Texture,
+                 textureOpacity: THREE.Texture,
+                 textureRoughness: THREE.Texture,
+): void => {
   if (!objects.scene) return;
 
   const geometry = new THREE.BoxGeometry(
@@ -163,7 +177,16 @@ const addDoor = (texture: THREE.Texture): void => {
       doorHeight.value,
       0.3
   );
-  const material = new THREE.MeshBasicMaterial({map: texture});
+  const material = new THREE.MeshStandardMaterial({
+    map: textureBase,
+    alphaMap: textureOpacity,
+    aoMap: textureAmbientOcclusion,
+    displacementMap: textureHeight,
+    normalMap: textureNormal,
+    roughnessMap: textureRoughness,
+    metalnessMap: textureMetallic
+  });
+
   objects.door = new THREE.Mesh(geometry, material);
   objects.door.position.set(3, 3, 0);
   objects.door.castShadow = true;
@@ -176,7 +199,7 @@ const addFigures = (): void => {
 
   const sphere = new THREE.Mesh(
       new THREE.SphereGeometry(1, 20, 20),
-      new THREE.MeshBasicMaterial({color: "red"})
+      new THREE.MeshStandardMaterial({color: "red"})
   );
   sphere.castShadow = true;
   sphere.receiveShadow = false;
@@ -186,7 +209,7 @@ const addFigures = (): void => {
 
   const cube = new THREE.Mesh(
       new THREE.BoxGeometry(1, 1, 1),
-      new THREE.MeshBasicMaterial({color: "purple"})
+      new THREE.MeshStandardMaterial({color: "purple"})
   );
   cube.castShadow = true;
   cube.receiveShadow = false;
@@ -201,23 +224,8 @@ const addFigures = (): void => {
 const updateDoor = (): void => {
   if (!objects.door || !objects.scene) return;
 
-  objects.door.geometry.dispose();
-  objects.scene.remove(objects.door);
-
-  const newGeometry = new THREE.BoxGeometry(
-      doorWidth.value,
-      doorHeight.value,
-      0.1
-  );
-  const textureLoader = new THREE.TextureLoader();
-  textureLoader.load(`${window.location.pathname}/wood.png`, (texture: THREE.Texture) => {
-    objects.door = new THREE.Mesh(
-        newGeometry,
-        new THREE.MeshBasicMaterial({map: texture})
-    );
-    objects.door.position.set(3, 3, 0);
-    objects.scene?.add(objects.door);
-  });
+  objects.door.scale.set(doorWidth.value / 100 + 1, doorHeight.value / 100 + 1, 1);
+  objects.door.position.set(3, 3, 0);
 };
 
 const configureControls = (): void => {
