@@ -62,7 +62,10 @@ let clock = new THREE.Clock();
 const addScene = async () => {
   objects.scene = new THREE.Scene();
   objects.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-  objects.renderer = new THREE.WebGLRenderer({ antialias: true });
+  objects.renderer = new THREE.WebGLRenderer({
+    antialias: true,
+    powerPreference: "high-performance"
+  });
 
   const hdrLoader = new RGBELoader();
   const hdrTexture = await hdrLoader.loadAsync('/background.hdr');
@@ -90,20 +93,26 @@ const addScene = async () => {
   const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
   objects.scene.add(ambientLight);
 
-  const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+  const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
   directionalLight.position.set(0, 5, 5);
   directionalLight.castShadow = true;
-  directionalLight.shadow.mapSize.width = 2048;
-  directionalLight.shadow.mapSize.height = 2048;
+  directionalLight.shadow.mapSize.width = 4096;
+  directionalLight.shadow.mapSize.height = 4096;
+  directionalLight.shadow.camera.near = 0.5;
+  directionalLight.shadow.camera.far = 50;
+  directionalLight.shadow.camera.left = -20;
+  directionalLight.shadow.camera.right = 20;
+  directionalLight.shadow.camera.top = 20;
+  directionalLight.shadow.camera.bottom = -20;
   objects.scene.add(directionalLight);
 
   objects.scene.environment = hdrTexture;
   objects.scene.background = hdrTexture;
 
-  //objects.scene.background = new THREE.Color("white");
-
   if (objects.renderer && element.value) {
     objects.renderer.setSize(window.innerWidth, window.innerHeight);
+    objects.renderer.shadowMap.enabled = true;
+    objects.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     element.value.appendChild(objects.renderer.domElement);
 
     objects.renderer.setAnimationLoop(renderCamera);
@@ -137,6 +146,8 @@ const addDoor = (texture: THREE.Texture): void => {
   const material = new THREE.MeshBasicMaterial({ map: texture });
   objects.door = new THREE.Mesh(geometry, material);
   objects.door.position.set(3, 3, 0);
+  objects.door.castShadow = true;
+  objects.door.receiveShadow = true;
   objects.scene.add(objects.door);
 };
 
@@ -150,6 +161,8 @@ const addFigures = (): void => {
   sphere.castShadow = true;
   sphere.receiveShadow = false;
   sphere.position.set(-2, 3, 0);
+  sphere.castShadow = true;
+  sphere.receiveShadow = true;
 
   const cube = new THREE.Mesh(
       new THREE.BoxGeometry(1, 1, 1),
@@ -158,6 +171,9 @@ const addFigures = (): void => {
   cube.castShadow = true;
   cube.receiveShadow = false;
   cube.position.set(0,3,0);
+  cube.castShadow = true;
+  cube.receiveShadow = true;
+
 
   objects.scene.add(sphere, cube);
 };
@@ -180,8 +196,6 @@ const updateDoor = (): void => {
         new THREE.MeshBasicMaterial({ map: texture })
     );
     objects.door.position.set(3, -2, 0);
-    objects.door.castShadow = true;
-    objects.door.receiveShadow = false;
     objects.scene?.add(objects.door);
   });
 };
