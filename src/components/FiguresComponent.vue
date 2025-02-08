@@ -33,6 +33,7 @@ import {ref, onMounted, onBeforeUnmount, type Ref, computed} from 'vue';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { RGBELoader } from 'three/examples/jsm/loaders/RGBELoader';
 
 type SceneObjects = {
   scene: THREE.Scene | null;
@@ -59,22 +60,59 @@ const objects: SceneObjects = {
 let clock = new THREE.Clock();
 
 const addScene = async () => {
-  objects.loader = new GLTFLoader();
   objects.scene = new THREE.Scene();
-
-  if (objects.loader && objects.scene) {
-    const glt = await objects.loader.loadAsync("/background.glb");
-    glt.scene.scale.set(1.3, 1.3, 1.3);
-    objects.scene.add(glt.scene);
-  }
-
   objects.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-  objects.renderer = new THREE.WebGLRenderer({ antialias: true });
+  objects.renderer = new THREE.WebGLRenderer({
+    antialias: true,
+    powerPreference: "high-performance"
+  });
 
-  objects.scene.background = new THREE.Color("white");
+  const hdrLoader = new RGBELoader();
+  const hdrTexture = await hdrLoader.loadAsync('/background.hdr');
+  hdrTexture.mapping = THREE.EquirectangularReflectionMapping;
+
+  const floorTexture = new THREE.TextureLoader().load("/floor.jpg");
+  floorTexture.wrapS = THREE.RepeatWrapping;
+  floorTexture.wrapT = THREE.RepeatWrapping;
+  floorTexture.repeat.set(20, 20);
+
+  const floorMaterial = new THREE.MeshStandardMaterial({
+    map: floorTexture,
+    roughness: 0.8,
+    metalness: 0.2
+  });
+
+  const floor = new THREE.Mesh(
+      new THREE.CircleGeometry(50, 64),
+      floorMaterial
+  );
+  floor.rotation.x = -Math.PI / 2;
+  floor.receiveShadow = true;
+  objects.scene.add(floor);
+
+  const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+  objects.scene.add(ambientLight);
+
+  const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+  directionalLight.position.set(0, 5, 5);
+  directionalLight.castShadow = true;
+  directionalLight.shadow.mapSize.width = 4096;
+  directionalLight.shadow.mapSize.height = 4096;
+  directionalLight.shadow.camera.near = 0.5;
+  directionalLight.shadow.camera.far = 50;
+  directionalLight.shadow.camera.left = -20;
+  directionalLight.shadow.camera.right = 20;
+  directionalLight.shadow.camera.top = 20;
+  directionalLight.shadow.camera.bottom = -20;
+  objects.scene.add(directionalLight);
+
+  objects.scene.environment = hdrTexture;
+  objects.scene.background = hdrTexture;
 
   if (objects.renderer && element.value) {
     objects.renderer.setSize(window.innerWidth, window.innerHeight);
+    objects.renderer.shadowMap.enabled = true;
+    objects.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     element.value.appendChild(objects.renderer.domElement);
 
     objects.renderer.setAnimationLoop(renderCamera);
@@ -95,17 +133,6 @@ const addScene = async () => {
     addFigures();
     animate();
   });
-
-  objects.light = new THREE.PointLight( 0xfffff, 100, 1000 );
-  objects.light.position.set( 0, 10, 4);
-  objects.light.castShadow = true;
-  objects.scene.add( objects.light );
-
-  objects.light.shadow.mapSize.width = 512;
-  objects.light.shadow.mapSize.height = 512;
-  objects.light.shadow.camera.near = 0.5;
-  objects.light.shadow.camera.far = 500;
-
 };
 
 const addDoor = (texture: THREE.Texture): void => {
@@ -118,7 +145,9 @@ const addDoor = (texture: THREE.Texture): void => {
   );
   const material = new THREE.MeshBasicMaterial({ map: texture });
   objects.door = new THREE.Mesh(geometry, material);
-  objects.door.position.set(3, 2, 0);
+  objects.door.position.set(3, 3, 0);
+  objects.door.castShadow = true;
+  objects.door.receiveShadow = true;
   objects.scene.add(objects.door);
 };
 
@@ -131,7 +160,9 @@ const addFigures = (): void => {
   );
   sphere.castShadow = true;
   sphere.receiveShadow = false;
-  sphere.position.set(-2, 1, 0);
+  sphere.position.set(-2, 3, 0);
+  sphere.castShadow = true;
+  sphere.receiveShadow = true;
 
   const cube = new THREE.Mesh(
       new THREE.BoxGeometry(1, 1, 1),
@@ -139,7 +170,10 @@ const addFigures = (): void => {
   );
   cube.castShadow = true;
   cube.receiveShadow = false;
-  cube.position.set(0,1,0);
+  cube.position.set(0,3,0);
+  cube.castShadow = true;
+  cube.receiveShadow = true;
+
 
   objects.scene.add(sphere, cube);
 };
@@ -161,9 +195,7 @@ const updateDoor = (): void => {
         newGeometry,
         new THREE.MeshBasicMaterial({ map: texture })
     );
-    objects.door.position.set(3, 3, 0);
-    objects.door.castShadow = true;
-    objects.door.receiveShadow = false;
+    objects.door.position.set(3, -2, 0);
     objects.scene?.add(objects.door);
   });
 };
