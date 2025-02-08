@@ -71,6 +71,25 @@ const addScene = async () => {
   objects.scene.environment = hdrTexture;
   objects.scene.background = hdrTexture;
 
+  const floorTexture = new THREE.TextureLoader().load("/floor.jpg");
+  floorTexture.wrapS = THREE.RepeatWrapping;
+  floorTexture.wrapT = THREE.RepeatWrapping;
+  floorTexture.repeat.set(20, 20);
+
+  const floorMaterial = new THREE.MeshStandardMaterial({
+    map: floorTexture,
+    roughness: 0.8,
+    metalness: 0.2
+  });
+
+  const floor = new THREE.Mesh(
+      new THREE.CircleGeometry(50, 64),
+      floorMaterial
+  );
+  floor.rotation.x = -Math.PI / 2;
+  floor.receiveShadow = true;
+  objects.scene.add(floor);
+
   //objects.scene.background = new THREE.Color("white");
 
   if (objects.renderer && element.value) {
@@ -118,7 +137,7 @@ const addDoor = (texture: THREE.Texture): void => {
   );
   const material = new THREE.MeshBasicMaterial({ map: texture });
   objects.door = new THREE.Mesh(geometry, material);
-  objects.door.position.set(3, 2, 0);
+  objects.door.position.set(3, 3, 0);
   objects.scene.add(objects.door);
 };
 
@@ -131,7 +150,7 @@ const addFigures = (): void => {
   );
   sphere.castShadow = true;
   sphere.receiveShadow = false;
-  sphere.position.set(-2, 1, 0);
+  sphere.position.set(-2, 3, 0);
 
   const cube = new THREE.Mesh(
       new THREE.BoxGeometry(1, 1, 1),
@@ -139,7 +158,7 @@ const addFigures = (): void => {
   );
   cube.castShadow = true;
   cube.receiveShadow = false;
-  cube.position.set(0,1,0);
+  cube.position.set(0,3,0);
 
   objects.scene.add(sphere, cube);
 };
@@ -161,7 +180,7 @@ const updateDoor = (): void => {
         newGeometry,
         new THREE.MeshBasicMaterial({ map: texture })
     );
-    objects.door.position.set(3, 3, 0);
+    objects.door.position.set(3, -2, 0);
     objects.door.castShadow = true;
     objects.door.receiveShadow = false;
     objects.scene?.add(objects.door);
